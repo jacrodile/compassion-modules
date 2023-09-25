@@ -8,7 +8,7 @@
 #
 ##############################################################################
 
-from odoo import models, fields
+from odoo import fields, models
 
 
 class SurveyQuestion(models.Model):
@@ -29,12 +29,27 @@ class SurveyQuestion(models.Model):
             errors.update({self.id: self.constr_error_msg})
         return errors
 
+    def _create_options_array(self):
+        """
+        Creates an array for storing answer scores for a multiple choice question.
+        """
+        self.ensure_one()
+        options = [0] * len(self.suggested_answer_ids)
+    
+        if self.comments_allowed and self.comment_count_as_answer:
+            options.append(0)
+    
+        return options
 
-class SurveyQuestionAnswer(models.Model):
+
+class SurveyselfAnswer(models.Model):
     _inherit = "survey.question.answer"
 
-    value_right = fields.Char("Suggested value (counter-proposition)", translate=True,
-                              help="Used in Matrix questions for adding a label at the last column.")
+    value_right = fields.Char(
+        "Suggested value (counter-proposition)",
+        translate=True,
+        help="Used in Matrix questions for adding a label at the last column.",
+    )
 
 
 class SurveyUserInputLine(models.Model):

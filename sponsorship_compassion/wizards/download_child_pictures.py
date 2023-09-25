@@ -9,11 +9,12 @@
 ##############################################################################
 import base64
 import logging
-import requests
 from io import BytesIO
 from zipfile import ZipFile
 
-from odoo import models, api, fields
+import requests
+
+from odoo import api, fields, models
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,9 @@ class DownloadChildPictures(models.TransientModel):
     type = fields.Selection(
         [("headshot", "Headshot"), ("fullshot", "Fullshot")], default="headshot"
     )
-    child_ids = fields.Many2many("compassion.child", default=lambda s: s._get_children())
+    child_ids = fields.Many2many(
+        "compassion.child", default=lambda s: s._get_children()
+    )
     height = fields.Integer()
     width = fields.Integer()
     download_data = fields.Binary(readonly=True)
@@ -47,7 +50,9 @@ class DownloadChildPictures(models.TransientModel):
 
     def get_picture_url(self, child):
         if self.type.lower() == "headshot":
-            cloudinary = "g_face,c_thumb,h_" + str(self.height) + ",w_" + str(self.width)
+            cloudinary = (
+                "g_face,c_thumb,h_" + str(self.height) + ",w_" + str(self.width)
+            )
         elif self.type.lower() == "fullshot":
             cloudinary = "w_" + str(self.width) + ",h_" + str(self.height) + ",c_fit"
         overlay = ""
@@ -68,7 +73,7 @@ class DownloadChildPictures(models.TransientModel):
         return url
 
     def get_pictures(self):
-        """ Create the zip archive from the selected letters. """
+        """Create the zip archive from the selected letters."""
         zip_buffer = BytesIO()
         with ZipFile(zip_buffer, "w") as zip_data:
             found = 0
@@ -123,8 +128,7 @@ class DownloadChildPictures(models.TransientModel):
         if children_with_no_url:
             child_codes = children_with_no_url.mapped("local_id")
             self.information += (
-                "No image url for child(ren):\n\t" + "\n\t".join(
-                    child_codes) + "\n\n"
+                "No image url for child(ren):\n\t" + "\n\t".join(child_codes) + "\n\n"
             )
 
         # Now we want children having an invalid 'image_url'.

@@ -10,7 +10,8 @@
 import functools
 import random
 import string
-from odoo import api, fields, models, _
+
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 from .contracts import SPONSORSHIP_TYPE_LIST
@@ -25,7 +26,8 @@ class ResPartner(models.Model):
     ##########################################################################
     #                                 FIELDS                                 #
     ##########################################################################
-    portal_sponsorships = fields.Selection([
+    portal_sponsorships = fields.Selection(
+        [
             ("all", "All (partner is the correspondent and/or the payer)"),
             ("all_info", "All + correspondence info shown to payer only."),
             ("correspondent", "Correspondent (Children the partner corresponds with)"),
@@ -59,16 +61,10 @@ class ResPartner(models.Model):
         compute="_compute_related_contracts",
         string="Other contracts",
     )
-    unrec_items = fields.Integer(
-        compute="_compute_count_items"
-    )
-    receivable_items = fields.Integer(
-        compute="_compute_count_items"
-    )
+    unrec_items = fields.Integer(compute="_compute_count_items")
+    receivable_items = fields.Integer(compute="_compute_count_items")
     has_sponsorships = fields.Boolean()
-    number_sponsorships = fields.Integer(
-        string="Number of sponsorships", copy=False
-    )
+    number_sponsorships = fields.Integer(string="Number of sponsorships", copy=False)
     preferred_name = fields.Char()
     sponsored_child_ids = fields.One2many(
         "compassion.child",
@@ -77,7 +73,8 @@ class ResPartner(models.Model):
         readonly=False,
     )
     number_children = fields.Integer(
-        string="Number of children", related="number_sponsorships",
+        string="Number of children",
+        related="number_sponsorships",
     )
     member_ids = fields.One2many(
         "res.partner",
@@ -93,13 +90,13 @@ class ResPartner(models.Model):
     church_id = fields.Many2one(
         "res.partner", "Church", domain=[("is_church", "=", True)], readonly=False
     )
-    gmc_gender = fields.Char(compute='_compute_gmc_gender')
+    gmc_gender = fields.Char(compute="_compute_gmc_gender")
 
     ##########################################################################
     #                             FIELDS METHODS                             #
     ##########################################################################
     def _compute_related_contracts(self):
-        """ Returns the contracts of the sponsor of given type
+        """Returns the contracts of the sponsor of given type
         ('fully_managed', 'correspondent' or 'payer')
         """
         contract_obj = self.env["recurring.contract"]
@@ -133,10 +130,16 @@ class ResPartner(models.Model):
                 + partner.contracts_paid
                 + partner.contracts_fully_managed
             )
-            partner.other_contract_ids = contract_obj.search([
-                ("partner_id", "=", partner.id),
-                ("type", "not in", SPONSORSHIP_TYPE_LIST)
-            ],order="start_date desc").ids or False
+            partner.other_contract_ids = (
+                contract_obj.search(
+                    [
+                        ("partner_id", "=", partner.id),
+                        ("type", "not in", SPONSORSHIP_TYPE_LIST),
+                    ],
+                    order="start_date desc",
+                ).ids
+                or False
+            )
 
     def _compute_count_items(self):
         move_line_obj = self.env["account.move.line"]
@@ -163,14 +166,15 @@ class ResPartner(models.Model):
 
     @api.depends("category_id", "member_ids")
     def _compute_is_church(self):
-        """ Tell if the given Partners are Church Partners
-            (by looking at their categories). """
+        """Tell if the given Partners are Church Partners
+        (by looking at their categories)."""
 
         # Retrieve all the categories and check if one is Church
         church_category = (
             self.env["res.partner.category"]
-                .with_context(lang="en_US").sudo()
-                .search([("name", "=", "Church")], limit=1)
+            .with_context(lang="en_US")
+            .sudo()
+            .search([("name", "=", "Church")], limit=1)
         )
         for record in self:
             is_church = False
@@ -181,24 +185,24 @@ class ResPartner(models.Model):
             record.is_church = is_church
 
     def _compute_gmc_gender(self):
-        male = 'Male'
-        female = 'Female'
-        unknown = 'Unkown'
-        unset = 'Not Applicable'
+        male = "Male"
+        female = "Female"
+        unknown = "Unkown"
+        unset = "Not Applicable"
         title_mapping = {
-            'Mister': male,
-            'Madam': female,
-            'Miss': female,
-            'Doctor': unknown,
-            'Professor': unknown,
-            'Misters': male,
-            'Ladies': female,
-            'Mister and Madam': unset,
-            'Friends of Compassion': unset,
-            'Family': unset,
+            "Mister": male,
+            "Madam": female,
+            "Miss": female,
+            "Doctor": unknown,
+            "Professor": unknown,
+            "Misters": male,
+            "Ladies": female,
+            "Mister and Madam": unset,
+            "Friends of Compassion": unset,
+            "Family": unset,
         }
         for partner in self:
-            title = partner.with_context(lang='en_US').name
+            title = partner.with_context(lang="en_US").name
             partner.gmc_gender = title_mapping.get(title, unknown)
 
     ##########################################################################
@@ -250,16 +254,20 @@ class ResPartner(models.Model):
             "type": "ir.actions.act_window",
             "view_mode": "tree,form",
             "views": [
-                (self.env.ref(
-                    "sponsorship_compassion.view_invoice_line_partner_tree").id,
-                 "tree"),
-                (False, "form")],
+                (
+                    self.env.ref(
+                        "sponsorship_compassion.view_invoice_line_partner_tree"
+                    ).id,
+                    "tree",
+                ),
+                (False, "form"),
+            ],
             "res_model": "account.move.line",
             "target": "current",
             "context": self.with_context(
                 search_default_partner_id=self.ids
             ).env.context,
-            "domain": self.env.context.get("domain", [])
+            "domain": self.env.context.get("domain", []),
         }
 
         return action
@@ -284,7 +292,11 @@ class ResPartner(models.Model):
     def create_contract(self):
         self.ensure_one()
         context = self.with_context(
-            {"default_partner_id": self.id, "default_type": "S", "type": "S", }
+            {
+                "default_partner_id": self.id,
+                "default_type": "S",
+                "type": "S",
+            }
         ).env.context
         return {
             "type": "ir.actions.act_window",
@@ -307,8 +319,8 @@ class ResPartner(models.Model):
         ).show_move_lines()
 
     def open_contracts(self):
-        """ Used to bypass opening a contract in popup mode from
-        res_partner view. """
+        """Used to bypass opening a contract in popup mode from
+        res_partner view."""
         self.ensure_one()
         return {
             "type": "ir.actions.act_window",
@@ -322,8 +334,8 @@ class ResPartner(models.Model):
         self.ensure_one()
         children = (
             self.env["recurring.contract"]
-                .search(self._get_active_sponsorships_domain())
-                .mapped("child_id")
+            .search(self._get_active_sponsorships_domain())
+            .mapped("child_id")
         )
         return {
             "type": "ir.actions.act_window",
@@ -338,7 +350,7 @@ class ResPartner(models.Model):
         self.preferred_name = self.firstname or self.name
 
     def forget_me(self):
-        """ Anonymize partner and delete sensitive data.
+        """Anonymize partner and delete sensitive data.
         This will call the GDPR Data Protection Request on Connect,
         Remove all letters and communication history, and attachments.
         """
@@ -460,9 +472,7 @@ class ResPartner(models.Model):
         if self.portal_sponsorships in ["all", "all_info"]:
             sponsorships = self.sponsorship_ids
         else:
-            sponsorships = (
-                    self.contracts_correspondant + self.contracts_fully_managed
-            )
+            sponsorships = self.contracts_correspondant + self.contracts_fully_managed
         if states is not None:
             if not isinstance(states, list):
                 states = [states]
@@ -478,12 +488,14 @@ class ResPartner(models.Model):
         """
         payment_term_id = vals.get("property_payment_term_id")
         if payment_term_id:
-            invoices = self.env["account.move"].search([
-                ("partner_id", "in", self.ids),
-                ("payment_state", "=", "not_paid"),
-                ("state", "!=", "cancel"),
-                ("invoice_payment_term_id", "!=", payment_term_id)
-            ])
+            invoices = self.env["account.move"].search(
+                [
+                    ("partner_id", "in", self.ids),
+                    ("payment_state", "=", "not_paid"),
+                    ("state", "!=", "cancel"),
+                    ("invoice_payment_term_id", "!=", payment_term_id),
+                ]
+            )
             data_invs = invoices._build_invoices_data(payment_term_id=payment_term_id)
             if data_invs:
                 invoices.update_open_invoices(data_invs)

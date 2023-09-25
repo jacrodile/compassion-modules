@@ -7,8 +7,7 @@
 #
 ##############################################################################
 
-from odoo import tools
-from odoo import models, fields, api
+from odoo import api, fields, models, tools
 
 
 class SponsorshipsEvolutionMonthsReport(models.Model):

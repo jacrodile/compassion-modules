@@ -9,13 +9,14 @@
 ##############################################################################
 import base64
 
-from odoo import api, models, fields
+from odoo import api, fields, models
 
 
 class PrintChildpack(models.TransientModel):
     """
     Wizard for selecting a the child dossier type and language.
     """
+
     _name = "print.childpack"
     _description = "Select the child dossier type and language"
 
@@ -53,16 +54,18 @@ class PrintChildpack(models.TransientModel):
         return self.env.lang
 
     def _compute_module_name(self):
-        self.module_name = __name__.split('.')[2]
+        self.module_name = __name__.split(".")[2]
 
     def get_report(self):
         """
         Print selected child dossier
         :return: Generated report
         """
-        children = self.env["compassion.child"].browse(
-            self.env.context.get("active_ids")
-        ).with_context(lang=self.lang)
+        children = (
+            self.env["compassion.child"]
+            .browse(self.env.context.get("active_ids"))
+            .with_context(lang=self.lang)
+        )
         data = {
             "lang": self.lang,
             "doc_ids": children.ids,

@@ -8,10 +8,11 @@
 #
 ##############################################################################
 import logging
-from odoo import api, models, fields, _
-
 from functools import reduce
+
 from babel.dates import format_date
+
+from odoo import _, api, fields, models
 
 _logger = logging.getLogger(__name__)
 

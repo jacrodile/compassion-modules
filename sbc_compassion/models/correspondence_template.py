@@ -15,14 +15,14 @@ import os.path
 import subprocess
 import tempfile
 
-from odoo import fields, models, _
+from odoo import _, fields, models
 from odoo.tools import config
 
 _logger = logging.getLogger(__name__)
 
 
 class Style:
-    """ Defines a few colors for drawing on the result picture
+    """Defines a few colors for drawing on the result picture
     (names from wikipedia).
     The color order is BGR"""
 
@@ -36,7 +36,7 @@ class Style:
 
 
 class CorrespondenceTemplate(models.Model):
-    """ This class defines a template used for Supporter Letters and holds
+    """This class defines a template used for Supporter Letters and holds
     all information relative to position of metadata in the Template, like for
     instance where the QR Code is supposed to be, where the language
     checkboxes will be found, where the pattern will be, etc...
@@ -52,7 +52,12 @@ class CorrespondenceTemplate(models.Model):
     ##########################################################################
     name = fields.Char(required=True, translate=True)
     type = fields.Selection(
-        [("s2b", "S2B Template"), ("b2s", "B2S Layout"), ], required=True, default="s2b"
+        [
+            ("s2b", "S2B Template"),
+            ("b2s", "B2S Layout"),
+        ],
+        required=True,
+        default="s2b",
     )
     active = fields.Boolean(default=True)
     layout = fields.Selection(
@@ -81,7 +86,7 @@ class CorrespondenceTemplate(models.Model):
         "correspondence.template.page",
         "Additional page",
         help="Template used in case the S2B text is too long to fit on the "
-             "standard two-sided page.",
+        "standard two-sided page.",
         readonly=False,
     )
 

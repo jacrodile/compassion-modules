@@ -7,11 +7,11 @@
 #    The licence is in the file __manifest__.py
 #
 ##############################################################################
-from odoo import models, fields, api, _
+from odoo import _, api, fields, models
 
 
 class IrAdvancedTranslation(models.Model):
-    """ Used to translate terms in context of a subject that can be
+    """Used to translate terms in context of a subject that can be
     male / female and singular / plural.
     """
 
@@ -36,7 +36,7 @@ class IrAdvancedTranslation(models.Model):
 
     @api.model
     def get(self, src, female=False, plural=False):
-        """ Returns the translation term. """
+        """Returns the translation term."""
         lang = self.env.context.get("lang") or self.env.lang or "en_US"
         term = self.search([("src", "=", src), ("lang", "=", lang)])
         if not term:

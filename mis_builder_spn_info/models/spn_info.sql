@@ -1,7 +1,7 @@
 CREATE OR REPLACE VIEW mis_spn_info AS (
     SELECT row_number() OVER (ORDER BY a.date) AS id, a.*
     FROM (
-        SELECT 
+        SELECT
             activation_date::date AS date,
             aa.id AS account_id,
             correspondent_id,
@@ -21,15 +21,15 @@ CREATE OR REPLACE VIEW mis_spn_info AS (
             sub_sponsorship_id,
             parent_id,
             end_reason_id
-        FROM 
+        FROM
             recurring_contract rc
             LEFT JOIN recurring_contract_origin rco ON rco.id = rc.origin_id
             LEFT JOIN account_account aa ON aa.company_id = rc.company_id AND aa."name" = 'Child Sponsored'
-        WHERE 
-            activation_date IS NOT NULL 
+        WHERE
+            activation_date IS NOT NULL
             AND child_id IS NOT NULL
         UNION
-        SELECT 
+        SELECT
             end_date::date AS date,
             aa.id AS account_id,
             correspondent_id,
@@ -49,11 +49,11 @@ CREATE OR REPLACE VIEW mis_spn_info AS (
             sub_sponsorship_id,
             parent_id,
             end_reason_id
-        FROM 
+        FROM
             recurring_contract rc
             LEFT JOIN recurring_contract_origin rco ON rco.id = rc.origin_id
             LEFT JOIN account_account aa ON aa.company_id = rc.company_id AND aa."name" = 'Child Sponsored'
-        WHERE 
+        WHERE
             activation_date IS NOT NULL
             AND end_date IS NOT NULL
             AND child_id IS NOT NULL

@@ -8,14 +8,15 @@
 #
 ##############################################################################
 import sys
-from datetime import datetime, timedelta, date
+from datetime import date, datetime, timedelta
 from math import ceil
 
 from dateutil.relativedelta import relativedelta
-from odoo.addons.message_center_compassion.tools.onramp_connector import OnrampConnector
 
-from odoo import models, fields, api, _
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+
+from odoo.addons.message_center_compassion.tools.onramp_connector import OnrampConnector
 
 
 class GlobalChildSearch(models.TransientModel):
@@ -119,7 +120,7 @@ class GlobalChildSearch(models.TransientModel):
         "Number of restricted children",
         readonly=True,
         help="These children were removed from the search results because "
-             "of a Field Office restriction configuration.",
+        "of a Field Office restriction configuration.",
     )
     missing_dates = fields.Text(help="All birthdates not found when using 365 search")
 
@@ -237,7 +238,7 @@ class GlobalChildSearch(models.TransientModel):
         return True
 
     def make_a_hold(self):
-        """ Create hold and send to Connect """
+        """Create hold and send to Connect"""
         self.ensure_one()
         return {
             "name": _("Specify Attributes"),
@@ -308,7 +309,7 @@ class GlobalChildSearch(models.TransientModel):
         return True
 
     def do_365_mix(self):
-        """ Try to find one child per day of the year having his birthdate
+        """Try to find one child per day of the year having his birthdate
         on that date."""
         today = date.today()
         first_day = today.replace(day=1, month=1)
@@ -404,8 +405,8 @@ class GlobalChildSearch(models.TransientModel):
         def _get_filter(field_name, operator_id, value):
             field_id = (
                 self.env["ir.model.fields"]
-                    .search([("model", "=", self._name), ("name", "=", field_name)])
-                    .id
+                .search([("model", "=", self._name), ("name", "=", field_name)])
+                .id
             )
             return (
                 0,
@@ -541,7 +542,7 @@ class GlobalChildSearch(models.TransientModel):
     #                             PRIVATE METHODS                            #
     ##########################################################################
     def _call_search_service(
-            self, mapping_name, service_name, result_name, method="GET"
+        self, mapping_name, service_name, result_name, method="GET"
     ):
         """
         Calls the given search service for the global childpool
@@ -585,11 +586,10 @@ class GlobalChildSearch(models.TransientModel):
             raise UserError(error)
 
     def _does_match(self, child):
-        """ Returns if the selected criterias correspond to the given child.
-        """
+        """Returns if the selected criterias correspond to the given child."""
         if (
-                self.field_office_ids
-                and child.project_id.field_office_id not in self.field_office_ids
+            self.field_office_ids
+            and child.project_id.field_office_id not in self.field_office_ids
         ):
             return False
         if self.fcp_ids and child.project_id not in self.fcp_ids:
